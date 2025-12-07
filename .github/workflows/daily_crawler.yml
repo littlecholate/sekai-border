@@ -3,7 +3,7 @@ name: Hourly Ranking Update
 on:
     schedule:
         # Cron 表達式：每小時的第 5 分鐘執行 (避免整點塞車)
-        - cron: '5,35 * * * *'
+        - cron: '4,34 * * * *'
     # 允許你手動按按鈕觸發 (方便測試)
     workflow_dispatch:
 
@@ -29,3 +29,4 @@ jobs:
                   # 把 GitHub Secrets 注入環境變數
                   SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
                   SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+
