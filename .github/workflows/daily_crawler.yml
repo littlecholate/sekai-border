@@ -1,0 +1,31 @@
+name: Hourly Ranking Update
+
+on:
+    schedule:
+        # Cron 表達式：每小時的第 5 分鐘執行 (避免整點塞車)
+        - cron: '5,35 * * * *'
+    # 允許你手動按按鈕觸發 (方便測試)
+    workflow_dispatch:
+
+jobs:
+    update-ranking:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v3
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v3
+              with:
+                  node-version: '18'
+
+            - name: Install dependencies
+              run: npm install
+
+            - name: Run script
+              run: node fetch_all_rankings.js
+              env:
+                  # 把 GitHub Secrets 注入環境變數
+                  SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+                  SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
