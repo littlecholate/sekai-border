@@ -20,7 +20,7 @@ jobs:
                   node-version: '18'
 
             - name: Install dependencies
-              run: npm install
+              run: npm ci
 
             - name: Run script
               run: node fetch_all_rankings.js
@@ -28,5 +28,6 @@ jobs:
                   # 把 GitHub Secrets 注入環境變數
                   SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
                   SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+
 
 
