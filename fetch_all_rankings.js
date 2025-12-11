@@ -9,6 +9,36 @@ const URL_BORDER = 'https://api.hisekai.org/event/live/border';
 const TARGET_TOP_RANKS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
 const TARGET_MID_RANKS = [200, 300, 400, 500, 1000, 1500, 2000, 2500, 3000, 5000, 10000];
 
+// New function to check and clear old data
+async function checkAndClearOldEvent(newEventId) {
+    try {
+        // Get the first line of the table to check the existing event_id
+        const { data, error } = await supabase.from('event_rankings').select('event_id').limit(1);
+
+        if (error) throw error;
+
+        // If table is empty, do nothing
+        if (!data || data.length === 0) return;
+
+        const oldEventId = data[0].event_id;
+
+        // If the stored event_id does not match the new one coming from API
+        if (oldEventId !== newEventId) {
+            console.log(`[System] New event detected (Old: ${oldEventId}, New: ${newEventId}). Clearing old data...`);
+
+            // Erase all data that is NOT the current event ID
+            // Since we haven't inserted the new data yet, this effectively wipes the table
+            const { error: deleteError } = await supabase.from('event_rankings').delete().neq('event_id', newEventId);
+
+            if (deleteError) throw deleteError;
+
+            console.log('[System] Old event data cleared successfully.');
+        }
+    } catch (err) {
+        console.error('[System] Error checking/clearing old event:', err.message);
+    }
+}
+
 async function fetchAndSave() {
     const now = new Date().toISOString();
     console.log(`[${now}] 啟動抓取任務...`);
@@ -20,6 +50,12 @@ async function fetchAndSave() {
         const dataBorder = await resBorder.json();
 
         const eventId = dataTop100?.id || 'unknown_event';
+
+        // --- Execute the check before processing data ---
+        if (eventId !== 'unknown_event') {
+            await checkAndClearOldEvent(eventId);
+        }
+        // ------------------------------------------------
 
         let recordsToInsert = [];
 
